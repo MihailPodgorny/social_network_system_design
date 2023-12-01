@@ -53,7 +53,7 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServer"
 
-  /users/{userId}/friends/{friendId}:
+  /users/{userId}/friends/add:
     post:
       tags:
         - user
@@ -66,7 +66,7 @@ paths:
           schema:
             type: string
         - name: friendId
-          in: path
+          in: header
           required: true
           schema:
             type: string
@@ -81,6 +81,8 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/friends/delete:
     delete:
       tags:
         - user
@@ -93,7 +95,7 @@ paths:
           schema:
             type: string
         - name: friendId
-          in: path
+          in: header
           required: true
           schema:
             type: string
@@ -138,7 +140,7 @@ paths:
           $ref: "#/components/responses/InternalServer"
   /users/{userId}/feed:
     get:
-      operationId: getUserHomeFeed
+      operationId: getUserFeed
       tags:
         - user
       summary: Get user home feed
@@ -161,6 +163,67 @@ paths:
           $ref: "#/components/responses/NotAuthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+    put:
+      operationId: addPostToUserFeed
+      tags:
+        - feed
+      summary: Create new post to feed
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "203":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/feed/{postId}/upload_media:
+    post:
+      operationId: addMediaContentToUserPost
+      tags:
+        - feed
+      summary: Upload new media content to post
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Content"
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
         "500":
           $ref: "#/components/responses/InternalServer"
 
@@ -261,95 +324,6 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServer"
 
-  /feeds/user_feeds/{userId}:
-    get:
-      operationId: getFeedByUserId
-      tags:
-        - feed
-      summary: Get user feed
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Feed"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/NotAuthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "500":
-          $ref: "#/components/responses/InternalServer"
-    put:
-      operationId: addPostToUserFeed
-      tags:
-        - feed
-      summary: Create new post to feed
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "203":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Post"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/NotAuthorized"
-        "500":
-          $ref: "#/components/responses/InternalServer"
-
-  /feeds/user_feeds/{userId}/{postId}/upload_media:
-    post:
-      operationId: addMediaContentToUserPost
-      tags:
-        - feed
-      summary: Upload new media content to post
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: postId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/Content"
-      responses:
-        "201":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Post"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/NotAuthorized"
-        "500":
-          $ref: "#/components/responses/InternalServer"
-
   /chats/{chatId}:
     get:
       operationId: getChatMessages
@@ -368,7 +342,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Feed"
+                $ref: "#/components/schemas/Chat"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -385,6 +359,12 @@ paths:
       parameters:
         - name: chatId
           in: path
+          required: true
+          schema:
+            type: string
+        - name: text
+          in: query
+          description: Message text
           required: true
           schema:
             type: string
@@ -419,8 +399,8 @@ components:
     Feed:
       type: object
       properties:
-        id:
-          type: string
+        offset:
+          type: integer
         posts:
           type: array
           items:
