@@ -1,0 +1,514 @@
+openapi: 3.0.1
+info:
+  title: Social Network - OpenAPI 3.0
+  description: |-
+    This is API of a social network for a course on System Design.
+  version: 0.1.0
+externalDocs:
+  description: More info about service
+  url: https://github.com/MihailPodgorny
+servers:
+  - url: TODO
+
+tags:
+  - name: user
+    description: Operations about users
+  - name: feed
+    description: Operations about feeds
+  - name: chat
+    description: Operations about chats
+
+paths:
+  /users/{userId}/friends:
+    get:
+      tags:
+        - user
+      summary: Get user friend list
+      operationId: listUserFriends
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/friends/add:
+    post:
+      tags:
+        - user
+      summary: Add friend to user list
+      operationId: addUserFriendById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: friendId
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/friends/delete:
+    delete:
+      tags:
+        - user
+      summary: Remove user friend
+      operationId: deleteUserFriendById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: friendId
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}:
+    get:
+      operationId: getUserInfo
+      tags:
+        - user
+      summary: Get user information
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+  /users/{userId}/feed:
+    get:
+      operationId: getUserFeed
+      tags:
+        - user
+      summary: Get user home feed
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+    put:
+      operationId: addPostToUserFeed
+      tags:
+        - feed
+      summary: Create new post to feed
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "203":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/feed/{postId}/upload_media:
+    post:
+      operationId: addMediaContentToUserPost
+      tags:
+        - feed
+      summary: Upload new media content to post
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Content"
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/chats:
+    get:
+      operationId: listUserChats
+      tags:
+        - user
+      summary: Get all user chats
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Chat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /users/{userId}/chats/{chatId}:
+    get:
+      operationId: getUserChatById
+      tags:
+        - user
+      summary: Get user chat
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+    put:
+      operationId: sentMessageToUserChat
+      tags:
+        - user
+      summary: Sent message to user chat
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "203":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+  /chats/{chatId}:
+    get:
+      operationId: getChatMessages
+      tags:
+        - chat
+      summary: Get user feed
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+    put:
+      operationId: sentMessageToChat
+      tags:
+        - chat
+      summary: Sent message to public or private chat
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: text
+          in: query
+          description: Message text
+          required: true
+          schema:
+            type: string
+      responses:
+        "203":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServer"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+      required:
+        - id
+        - fullName
+    Feed:
+      type: object
+      properties:
+        offset:
+          type: integer
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+      required:
+        - id
+        - content
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          $ref: "#/components/schemas/Content"
+      required:
+        - id
+        - content
+    Content:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: ["media", "image"]
+      required:
+        - id
+    Chat:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: ["dialog", "private", "public"]
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+      required:
+        - id
+        - type
+        - users
+        - messages
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          $ref: "#/components/schemas/Content"
+      required:
+        - id
+        - content
+
+  responses:
+    BadRequest:
+      description: Bad request exception
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+              message:
+                type: string
+              fields:
+                type: object
+                properties:
+                  field:
+                    type: array
+                    items:
+                      type: string
+    NotAuthorized:
+      description: The requester is unauthorized.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+              message:
+                type: string
+    NotFound:
+      description: Not found error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+              message:
+                type: string
+    InternalServer:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+              message:
+                type: string
