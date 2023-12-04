@@ -1,0 +1,102 @@
+// Docs: https://dbml.dbdiagram.io/docs
+
+// Tables.
+
+Table users {
+  id integer [primary key]
+  first_name varchar(255)
+  last_name varchar(255)
+  description varchar(255)
+  photo_id varchar(255)
+  city varchar(255)
+  interests text
+}
+
+Table posts {
+  id integer [primary key]
+  user_id integer [not null]
+  description varchar(255)
+  photo_id varchar(255)
+  audio_id varchar(255)
+  video_id varchar(255)
+  hastags varchar(255)
+  likes integer [default: 0, not null]
+  views integer [default: 0, not null]
+}
+
+Table hashtags {
+  id integer [primary key]
+  name varchar(255)
+}
+
+Table chats {
+  id integer [primary key]
+  name varchar(255)
+}
+
+Table messages {
+  id integer [primary key]
+  user_id integer [not null]
+  chat_id integer [not null]
+  text text  [not null]
+  created_at datetime
+  updated_at datetime
+  is_read boolean [default: false]
+}
+
+Table relations {
+  id integer [primary key]
+  user_id integer
+  target_user_id integer
+  is_subscription boolean
+  relation_type varchar(255)
+}
+
+Table photos {
+  id integer [primary key]
+  link varchar(255) [not null]
+}
+
+Table audio {
+  id integer [primary key]
+  link varchar(255) [not null]
+}
+
+Table videos {
+  id integer [primary key]
+  link varchar(255) [not null]
+}
+
+// M2M tables.
+
+Table chats_users_junction {
+  user_id integer
+  chat_id integer
+}
+
+
+Table posts_hashtags_junction {
+  post_id integer
+  hashtag_id integer
+}
+
+// Refs.
+
+Ref: users.photo_id > photos.id
+
+Ref: posts.user_id > users.id
+Ref: posts.photo_id > photos.id
+Ref: posts.audio_id > audio.id
+Ref: posts.video_id > videos.id
+
+Ref: posts_hashtags_junction.post_id > posts.id
+Ref: posts_hashtags_junction.hashtag_id > hashtags.id
+
+Ref: relations.user_id - users.id
+Ref: relations.target_user_id - users.id
+
+Ref: chats_users_junction.user_id > users.id
+Ref: chats_users_junction.chat_id > chats.id
+
+Ref: messages.chat_id > chats.id
+Ref: messages.user_id > users.id
