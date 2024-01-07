@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round-robin")
+Container(apiGateway, "API Gateway", "Istio")
+
+System_Boundary(relationSystem, "Relation System") {
+    Container(relationService, "Relation Service", "Go", "Handles adding and removing friends")
+    ContainerDb(relationDatabase, "Relation database", "PostgreSQL", "Stores relations (friends, subscribers, etc.)")
+}
+
+Rel(user, loadBalancer, "Views friends, adds and removes friends", "REST")
+Rel(loadBalancer, apiGateway, "Views friends, adds and removes friends", "REST")
+Rel(apiGateway, relationService, "Views friends, adds and removes friends", "GRPC")
+Rel(relationService, relationDatabase, "CRUD relations")
+@enduml
