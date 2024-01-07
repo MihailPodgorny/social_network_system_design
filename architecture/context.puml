@@ -1,0 +1,16 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(profileSystem, "Profile System", "Software system", "Handles user profiles")
+Container(relationSystem, "Relation System", "Software system", "Handles relations between users (friends, subscribers, etc.)")
+Container(mediaSystem, "Media System", "Software system", "Handles uploading media files")
+Container(postSystem, "Post System", "Software system", "Handles posts and home/user feeds")
+Container(messageSystem, "Message System", "Software system", "Handles messages")
+
+Rel(user, profileSystem, "Views user's profile")
+Rel(user, relationSystem, "Views friends, add/remove friends")
+Rel(user, postSystem, "Publishes posts, views home and user feeds")
+Rel(user, mediaSystem, "Uploads media files")
+Rel(user, messageSystem, "Views chats, sends and reads messages")
+@enduml

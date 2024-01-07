@@ -1,0 +1,28 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round-robin")
+Container(apiGateway, "API Gateway", "Istio")
+Container(relationSystem, "Relation System", "Software system", "Stores relations (friends, subscribers, etc.) between users")
+
+System_Boundary(postSystem, "Post System") {
+    Container(postService, "Post Service", "Go", "Handles creating and reading posts, other related things (hashtags, comments, likes etc.)")
+    Container(feedService, "Feed service", "Go", "Handles building and reading feeds")
+    ContainerDb(postDatabase, "Post database", "PostgreSQL", "Stores posts, hashtags, comments, likes and etc")
+    ContainerDb(feedCache, "Feed cache", "Redis", "Stores home/user feeds")
+    ContainerQueue(messageQueue, "Events queue", "Kafka", "Message queue for post creation events")
+}
+
+Rel(user, loadBalancer, "Publishes post and reads home/user feed", "REST")
+Rel(loadBalancer, apiGateway, "Publishes post and reads home/user feed", "REST")
+Rel(apiGateway, postService, "Publishes post", "GRPC")
+Rel(apiGateway, feedService, "Read home/user feed", "GRPC")
+
+Rel(postService, postDatabase, "Creates and reads posts")
+Rel(postService, messageQueue, "Publishes post creation events")
+Rel(feedService, messageQueue, "Subscribes on post creation events")
+Rel(feedService, feedCache, "Creates and reads feeds")
+Rel(feedService, postService, "Gets the next chunk of posts for caching if user has read the feed", "GRPC")
+Rel(feedService, relationSystem, "Gets friends, subscribers of the post author", "GRPC")
+@enduml
